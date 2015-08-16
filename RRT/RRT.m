@@ -30,6 +30,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         DistanceFcn
         %   to state transition function
         StateTransitionFcn
+        %   select state to grow to
+        SelectWhereToGrowToFcn
         
         
     end
@@ -50,7 +52,9 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     
     methods (Access = public)
         
-        function obj = RRT(DistanceFcn, StateTransitionFcn)
+        function obj = RRT(DistanceFcn,...
+                            StateTransitionFcn,...
+                            SelectWhereToGrowToFcn)
             %RRT creates an empty RRT object .
             %  Example:
             %   R = RRT(DistanceFcn)
@@ -74,13 +78,13 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             % Register Distance function
             obj.DistanceFcn = DistanceFcn;
             obj.StateTransitionFcn = StateTransitionFcn;
+            obj.SelectWhereToGrowToFcn = SelectWhereToGrowToFcn;
             
         end
         
-        function obj = Grow(obj, SelectWhereToGrowToFcn,...
-                GrowthInputsFcn)
+        function obj = Grow(obj, GrowthInputsFcn)
             
-            NewStateToGrowTo = SelectWhereToGrowToFcn();
+            NewStateToGrowTo = obj.SelectWhereToGrowToFcn();
             VerticesToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo);
             
             from = obj.Vertices(VerticesToGrowId).State;
