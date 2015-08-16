@@ -68,7 +68,8 @@ for i = 1:200
         
         g(k).Grow();
 
-      PlotPoint(g(k).Vertices(i).State(1:2),'ob');
+        p = g(k).vertixState(1:2,k)
+        PlotPoint(p,'ob');
         drawnow update
     end
     

@@ -8,12 +8,18 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     properties (GetAccess = public, SetAccess = protected)
         % Vertices of the graph
         % READ-ONLY
-        Vertices
+        
+        %  Vertix variables
+        vertixState
+        vertixId
+        vertixIsExpandable
         VerticesListLength
         
-        % Edges of the graph
-        % READ-ONLY
-        Edges
+        %  Edgevariables
+        edgeControls
+        edgeId
+        edgeFromVertexId
+        edgeToVertexId
         EdgesListLength
         
     end
@@ -54,9 +60,9 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     methods (Access = public)
         
         function obj = RRT(DistanceFcn,...
-                            StateTransitionFcn,...
-                            SelectWhereToGrowToFcn,...
-                            GrowthInputsFcn)
+                StateTransitionFcn,...
+                SelectWhereToGrowToFcn,...
+                GrowthInputsFcn)
             %RRT creates an empty RRT object .
             %  Example:
             %   R = RRT(DistanceFcn)
@@ -64,18 +70,24 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             %   parameters
             %
             %       DistanceFcn   is a function handle to a function that computes distances between states;
-            obj.graph = digraph();
             
             % Initialize vertices
-            obj.Vertices.State = [];
-            obj.Vertices.id = [];
-            obj.Vertices.IsExpandable = [];
+            obj.vertixState = [];
+            obj.vertixId = [];
+            obj.vertixIsExpandable = [];
             obj.VerticesListLength = 0;
-  
+            
             % Initialize edges
-            obj.Edges = [];
+            obj.edgeControls = [];
+            obj.edgeId = [];
+            obj.edgeFromVertexId = [];
+            obj.edgeToVertexId = [];
             obj.EdgesListLength = 0;
+            
+            % Initialize connectivity graph
             obj.graph = digraph();
+            
+            
             
             % Register Distance function
             obj.DistanceFcn = DistanceFcn;
@@ -90,100 +102,76 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             NewStateToGrowTo = obj.SelectWhereToGrowToFcn();
             VerticesToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo);
             
-            from = obj.Vertices(VerticesToGrowId).State;
+            from = obj.vertixState(:,VerticesToGrowId);
             to = NewStateToGrowTo;
             u = obj.GrowthInputsFcn(from, to);
             
-                NewStateToAdd = obj.StateTransitionFcn(...
-                    from,...
-                    u);
-                
-                VerticesToAddId = obj.AddVertexFromState(NewStateToAdd);
-                obj.AddEdges(VerticesToGrowId,...
-                    VerticesToAddId,...
-                    u);
-                
+            NewStateToAdd = obj.StateTransitionFcn(...
+                from,...
+                u);
+            
+            VerticesToAddId = obj.AddVertexFromState(NewStateToAdd);
+            obj.AddEdge(VerticesToGrowId,...
+                VerticesToAddId,...
+                u);
+            
         end
         
         function vids = SelectVerticesToGrowFrom(obj, NewStateToGrowTo)
             vids = obj.getNearestVertexId(NewStateToGrowTo);
         end
         
-        function obj = AddVertices(obj, VerticesToAdd)
+        function obj = AddEdge(obj, vFromId, vToId, Controls)
             
-            for k = 1:length(VerticesToAdd)
-                
-                v = VerticesToAdd(k);
-                
-                id = v.id;
-                obj.graph.addVertex(id);
-                
-                n = obj.VerticesListLength;
-                obj.Vertices(n+1) = v;
-                obj.VerticesListLength = n+1;
-                
-            end
-        end
-        
-        function obj = AddEdges(obj, VerticesFrom, VerticesTo, Controls)
+            % get an id for the edge
+            n = obj.EdgesListLength;
+            id = n + 1;
             
-            n1 = length(VerticesFrom);
-            n2 = length(VerticesTo);
-            for k1 = 1:n1
-                for k2 = 1:n2
-                    
-                    vFrom = VerticesFrom(k1);
-                    vTo = VerticesTo(k2);
-                    
-                    obj.graph.addEdge(vFrom, vTo);
-                    
-                    n = obj.EdgesListLength;
-                    if isempty(obj.Edges)
-                        obj.Edges.Controls = Controls;
-                                        obj.Edges.From = vFrom;
-                    obj.Edges.To = vTo;
-
-                    else
-                        obj.Edges(:,n+1).Controls = Controls;
-                    obj.Edges(n+1).From = vFrom;
-                    obj.Edges(n+1).To = vTo;
-
-                    end
-                     
-                    obj.EdgesListLength = n+1;
-                    
-                end
-            end
+            %//TODO: add more than one edge at a time (replace (1) with
+            %(k))
+            obj.edgeControls(:, n+1) = Controls(:,1);
+            obj.edgeId(n+1) = id(1);
+            obj.edgeFromVertexId(n+1) = vFromId(1);
+            obj.edgeToVertexId(n+1) = vToId(1);
+            
+            % update the edge count
+            obj.EdgesListLength = obj.EdgesListLength + 1;
+            
+            % add edge to the connectivity graph
+            obj.graph.addEdge(vFromId(1), vToId(1));
             
         end
         
         function id = AddVertexFromState(obj, State)
-            v.State = State;
-            id = obj.VerticesListLength + 1;      %//TODO change to id = hash
-            v.id = id;
-            v.IsExpandable = true;
-            obj.AddVertices(v);
+            
+            % Get a new id for the vertex
+            n = obj.VerticesListLength;
+            id =  n + 1;   %//TODO: find a smarter way to get a vertex id
+            
+            % fill in with vertex properties
+            obj.vertixState(:, n+1) = State;
+            obj.vertixId(n+1) = id;
+            obj.vertixIsExpandable = true;
+            
+            % add vertex to vertex connectivity graph
+            obj.graph.addVertex(id);
+            
+            % update the vertex count
+            obj.VerticesListLength = n + 1;
+            
         end
         
         function id = getNearestVertexId(obj, TargetState)
             
             
-            % //TODO: Vectorize this
-            vs = zeros(size(obj.Vertices(1).State,1), obj.VerticesListLength);
-            ids = zeros(1,obj.VerticesListLength);
-            
-            for k = 1:obj.VerticesListLength
-                vs(:,k) = obj.Vertices(k).State;
-                ids(k) = obj.Vertices(k).id;
-            end
-            
-            distance_to_vertices = obj.getDistancesPointToVertices(vs,...
+            distance_to_vertices = obj.getDistancesPointToVertices(obj.vertixState,...
                 TargetState);
-            id = ids(distance_to_vertices == min(distance_to_vertices));
+            id = obj.vertixId(distance_to_vertices == min(distance_to_vertices));
             
         end
         
     end
+    
     
     methods (Access = private)
         
