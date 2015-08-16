@@ -47,7 +47,7 @@ for k = 1:N_robots
     % Initialize the robot
     r(k) = Robot(InitialState{k});
     
-    g(k) = RRT();
+    g(k) = RRT(@DistanceXYFrom5State);
     % Add the starting vertex to the RRT graph
     g(k).AddVertexFromState(InitialState{k});
     
@@ -65,8 +65,7 @@ for i = 1:200
         
         g(k).Grow(@getNewRandomState,...
                     @StateUpdateFcn2DAngle,...
-                    @CalculateInputsXtoY5State,...
-                    @DistanceXYFrom5State);
+                    @CalculateInputsXtoY5State);
 
       PlotPoint(g(k).Vertices(i).State(1:2),'ob');
         drawnow update

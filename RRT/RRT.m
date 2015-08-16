@@ -25,6 +25,11 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         % //TODO: reimplement a graph class.
         graph
         
+        % Handle to function to compute distance between vertices/states
+        DistanceFcn
+        
+        
+        
     end
     
     %      properties (GetAccess = public, SetAccess = private)
@@ -43,33 +48,38 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     
     methods (Access = public)
         
-        function obj = RRT()
-            %RRT creates an RRT object with a single vertex (starting point).
+        function obj = RRT(DistanceFcn)
+            %RRT creates an empty RRT object .
             %  Example:
-            %   R = RRT(v)
+            %   R = RRT(DistanceFcn)
             %
             %   parameters
             %
-            %       v   is a vertex;
+            %       DistanceFcn   is a function handle to a function that computes distances between states;
             obj.graph = digraph();
             
+            % Initialize vertices
             obj.Vertices.State = [];
             obj.Vertices.id = [];
             obj.Vertices.IsExpandable = [];
             obj.VerticesListLength = 0;
   
+            % Initialize edges
             obj.Edges = [];
             obj.EdgesListLength = 0;
             obj.graph = digraph();
+            
+            % Register Distance function
+            obj.DistanceFcn = DistanceFcn;
+            
         end
         
         function obj = Grow(obj, SelectWhereToGrowToFcn,...
                 StateTransitionFcn,...
-                GrowthInputsFcn,...
-                DistanceFcn)
+                GrowthInputsFcn)
             
             NewStateToGrowTo = SelectWhereToGrowToFcn();
-            VerticesToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo, DistanceFcn);
+            VerticesToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo);
             
             from = obj.Vertices(VerticesToGrowId).State;
             to = NewStateToGrowTo;
@@ -86,8 +96,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                 
         end
         
-        function vids = SelectVerticesToGrowFrom(obj, NewStateToGrowTo, DistanceFcn)
-            vids = obj.getNearestVertexId(NewStateToGrowTo, DistanceFcn);
+        function vids = SelectVerticesToGrowFrom(obj, NewStateToGrowTo)
+            vids = obj.getNearestVertexId(NewStateToGrowTo);
         end
         
         function obj = AddVertices(obj, VerticesToAdd)
@@ -115,7 +125,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                     
                     vFrom = VerticesFrom(k1);
                     vTo = VerticesTo(k2);
-                    PlotEdge
+                    
                     obj.graph.addEdge(vFrom, vTo);
                     
                     n = obj.EdgesListLength;
@@ -146,7 +156,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             obj.AddVertices(v);
         end
         
-        function id = getNearestVertexId(obj, TargetState, DistanceFcn)
+        function id = getNearestVertexId(obj, TargetState)
             
             
             % //TODO: Vectorize this
@@ -159,8 +169,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             end
             
             distance_to_vertices = obj.getDistancesPointToVertices(vs,...
-                TargetState,...
-                DistanceFcn);
+                TargetState);
             id = ids(distance_to_vertices == min(distance_to_vertices));
             
         end
@@ -169,9 +178,10 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     
     methods (Access = private)
         
-        function d = getDistancesPointToVertices(~, vertices, point, distanceFcn)
+        function d = getDistancesPointToVertices(obj, vertices, point)
             rays = bsxfun(@minus, vertices, point);
-            d = arrayfun(@(idx) distanceFcn(zeros(size(point)), rays(:,idx)), 1:size(rays,2));
+            dfcn = obj.DistanceFcn;
+            d = arrayfun(@(idx) dfcn(zeros(size(point)), rays(:,idx)), 1:size(rays,2));
         end
     end
     
