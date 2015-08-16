@@ -25,9 +25,11 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         % //TODO: reimplement a graph class.
         graph
         
-        % Handle to function to compute distance between vertices/states
+        % Handles to functions
+        %   to compute distance between vertices/states
         DistanceFcn
-        
+        %   to state transition function
+        StateTransitionFcn
         
         
     end
@@ -48,7 +50,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     
     methods (Access = public)
         
-        function obj = RRT(DistanceFcn)
+        function obj = RRT(DistanceFcn, StateTransitionFcn)
             %RRT creates an empty RRT object .
             %  Example:
             %   R = RRT(DistanceFcn)
@@ -71,11 +73,11 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             
             % Register Distance function
             obj.DistanceFcn = DistanceFcn;
+            obj.StateTransitionFcn = StateTransitionFcn;
             
         end
         
         function obj = Grow(obj, SelectWhereToGrowToFcn,...
-                StateTransitionFcn,...
                 GrowthInputsFcn)
             
             NewStateToGrowTo = SelectWhereToGrowToFcn();
@@ -85,7 +87,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             to = NewStateToGrowTo;
             u = GrowthInputsFcn(from, to);
             
-                NewStateToAdd = StateTransitionFcn(...
+                NewStateToAdd = obj.StateTransitionFcn(...
                     from,...
                     u);
                 
