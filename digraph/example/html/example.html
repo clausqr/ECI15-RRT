@@ -1,0 +1,509 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Manipulating digraphs with Vertex labels</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-06-16"><meta name="DC.source" content="example.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Manipulating digraphs with Vertex labels</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Construct a new digraph</a></li><li><a href="#4">Vertices</a></li><li><a href="#5">Edges</a></li><li><a href="#8">Adjacency Matrix</a></li><li><a href="#13">Subgraphs</a></li><li><a href="#14">Finding Edges</a></li><li><a href="#20">Finding Paths</a></li><li><a href="#25">Union, Intersect, and Copy</a></li><li><a href="#29">Transitive Closure</a></li><li><a href="#33">Minimal Edges</a></li></ul></div><p>Many directed graph, or <b>digraph</b>, applications drop the vertex labels to focus on computations of the Adjacency Matrix, referring to the vertices only by their indices. The <tt>digraph</tt> class attempts to provide a convenient interface for those that require to know what the vertex actually represents.</p><p>This is a quick introduction to how to get started using <tt>digraph</tt>, but executing</p><pre class="language-matlab">help <span class="string">digraph</span>
+</pre><p>will provide links to read about more in-depth functionality, while</p><pre class="language-matlab">methods <span class="string">digraph</span>
+</pre><p>lists all valid functions that can be used with the digraph.</p><h2>Construct a new digraph<a name="3"></a></h2><p>Start by creating a blank digraph object:</p><pre class="codeinput">dg = digraph
+</pre><pre class="codeoutput">
+dg = 
+
+  digraph with properties:
+
+         AdjMat: []
+         Vertex: {}
+    NumVertices: 0
+       NumEdges: 0
+
+</pre><h2>Vertices<a name="4"></a></h2><p>Add vertex labels to the digraph. The labels must be strings.</p><pre class="codeinput">addVertex(dg,<span class="string">'A'</span>)
+addVertex(dg,<span class="string">'B'</span>)
+addVertex(dg,<span class="string">'C'</span>)
+addVertex(dg,<span class="string">'D'</span>)
+addVertex(dg,<span class="string">'E'</span>)
+addVertex(dg,<span class="string">'F'</span>)
+addVertex(dg,<span class="string">'G'</span>)
+addVertex(dg,<span class="string">'H'</span>)
+addVertex(dg,<span class="string">'I'</span>)
+addVertex(dg,<span class="string">'J'</span>)
+addVertex(dg,<span class="string">'K'</span>)
+</pre><h2>Edges<a name="5"></a></h2><p>To represent an edge from <i>A</i> onto <i>B</i>, the syntax is predictably</p><pre class="codeinput">addEdge(dg,<span class="string">'A'</span>,<span class="string">'B'</span>)
+</pre><p>Add others one at a time:</p><pre class="codeinput">addEdge(dg,<span class="string">'B'</span>,<span class="string">'I'</span>)
+addEdge(dg,<span class="string">'C'</span>,<span class="string">'D'</span>)
+addEdge(dg,<span class="string">'D'</span>,<span class="string">'I'</span>)
+addEdge(dg,<span class="string">'I'</span>,<span class="string">'E'</span>)
+addEdge(dg,<span class="string">'E'</span>,<span class="string">'F'</span>)
+addEdge(dg,<span class="string">'I'</span>,<span class="string">'F'</span>)
+addEdge(dg,<span class="string">'I'</span>,<span class="string">'G'</span>)
+addEdge(dg,<span class="string">'G'</span>,<span class="string">'H'</span>)
+addEdge(dg,<span class="string">'F'</span>,<span class="string">'K'</span>)
+</pre><p>Now our digraph is something substantial:</p><pre class="codeinput">dg
+</pre><pre class="codeoutput">
+dg = 
+
+  digraph with properties:
+
+         AdjMat: [11x11 double]
+         Vertex: {'A'  'B'  'C'  'D'  'E'  'F'  'G'  'H'  'I'  'J'  'K'}
+    NumVertices: 11
+       NumEdges: 10
+
+</pre><h2>Adjacency Matrix<a name="8"></a></h2><p>The Adjacency Matrix, shortened to <b><tt>AdjMat</tt></b>, is a matrix representation of the edges. <tt>AdjMat</tt>(<i>i</i>, <i>j</i>) is true if and only if there is an edge from vertex <i>i</i> to vertex <i>j</i>.</p><p>Thus the following are equivalent, either using the succinct <tt>hasEdge</tt> function:</p><pre class="codeinput">hasEdge(dg,<span class="string">'A'</span>,<span class="string">'B'</span>)
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+</pre><p>Or by using Vertex indices to access the <tt>AdjMat</tt> directly:</p><pre class="codeinput">[foundA,i] = hasVertex(dg,<span class="string">'A'</span>);
+[foundB,j] = hasVertex(dg,<span class="string">'B'</span>);
+<span class="keyword">if</span> foundA &amp;&amp; foundB <span class="comment">% make sure they were each found</span>
+    edge = dg.AdjMat(i,j)
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+edge =
+
+   (1,1)        1
+
+</pre><p>See <a href="matlab:doc('assertVertex')">assertVertex</a> for a stricter version of <tt>hasVertex</tt> and <a href="matlab:doc('removeVertex')">removeVertex</a> to learn more about accessing indices directly. Using the indices is a more advanced maneuver, to be used only when it is more convenient. The beauty of the digraph implementation is that you <b>don't</b> (and shouldn't!) have to track the corresponding index.</p><p>As gleened from the output above, the <tt>AdjMat</tt> is stored as a <a href="matlab:doc('sparse')">sparse</a> matrix, whose display can be hard to read:</p><pre class="codeinput">dg.AdjMat
+</pre><pre class="codeoutput">
+ans =
+
+   (1,2)        1
+   (3,4)        1
+   (9,5)        1
+   (5,6)        1
+   (9,6)        1
+   (9,7)        1
+   (7,8)        1
+   (2,9)        1
+   (4,9)        1
+   (6,11)       1
+
+</pre><p>View it as a full matrix by using <a href="matlab:doc('full')">full</a>. This is <b>not</b> advised for large matrices for the sake of memory.</p><pre class="codeinput">full(dg.AdjMat)
+</pre><pre class="codeoutput">
+ans =
+
+     0     1     0     0     0     0     0     0     0     0     0
+     0     0     0     0     0     0     0     0     1     0     0
+     0     0     0     1     0     0     0     0     0     0     0
+     0     0     0     0     0     0     0     0     1     0     0
+     0     0     0     0     0     1     0     0     0     0     0
+     0     0     0     0     0     0     0     0     0     0     1
+     0     0     0     0     0     0     0     1     0     0     0
+     0     0     0     0     0     0     0     0     0     0     0
+     0     0     0     0     1     1     1     0     0     0     0
+     0     0     0     0     0     0     0     0     0     0     0
+     0     0     0     0     0     0     0     0     0     0     0
+
+</pre><h2>Subgraphs<a name="13"></a></h2><p>Create subgraphs of your digraph by specifying the vertices. This will return a new digraph:</p><pre class="codeinput">subgraph(dg,{<span class="string">'C'</span>,<span class="string">'D'</span>,<span class="string">'G'</span>,<span class="string">'H'</span>})
+</pre><pre class="codeoutput">
+ans = 
+
+  digraph with properties:
+
+         AdjMat: [4x4 double]
+         Vertex: {'C'  'D'  'G'  'H'}
+    NumVertices: 4
+       NumEdges: 2
+
+</pre><h2>Finding Edges<a name="14"></a></h2><p>Find all vertices that <i>I</i> directly (explicitly) points to:</p><pre class="codeinput">findall(dg,<span class="string">'I'</span>,1)
+</pre><pre class="codeoutput">
+ans = 
+
+    'E'    'F'    'G'
+
+</pre><p>and those that directly point to <i>I</i>:</p><pre class="codeinput">findall(dg,<span class="string">'I'</span>,-1)
+</pre><pre class="codeoutput">
+ans = 
+
+    'B'    'D'
+
+</pre><p>Find all vertices that <i>I</i> directly or indirectly (implicitly) points to:</p><pre class="codeinput">findall(dg,<span class="string">'I'</span>,Inf)
+</pre><pre class="codeoutput">
+ans = 
+
+    'E'    'F'    'G'    'H'    'K'
+
+</pre><p>and those that directly or indirectly point to <i>I</i>:</p><pre class="codeinput">findall(dg,<span class="string">'I'</span>,-Inf)
+</pre><pre class="codeoutput">
+ans = 
+
+    'A'    'B'    'C'    'D'
+
+</pre><p>Find all vertices that are at most 3 edges "ahead" of <i>A</i>:</p><pre class="codeinput">findall(dg,<span class="string">'A'</span>,3)
+</pre><pre class="codeoutput">
+ans = 
+
+    'B'    'E'    'F'    'G'    'I'
+
+</pre><p><tt>findall</tt> will always return a <i>sorted</i> cell array.</p><h2>Finding Paths<a name="20"></a></h2><p>See if two vertices are linked by an edge directly:</p><pre class="codeinput">hasEdge(dg,<span class="string">'A'</span>,<span class="string">'K'</span>)
+</pre><pre class="codeoutput">
+ans =
+
+     0
+
+</pre><p>or indirectly.</p><pre class="codeinput">hasPath(dg,<span class="string">'A'</span>,<span class="string">'K'</span>)
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+</pre><p>Find the shortest path from one to the other. This implements Dijkstra's algorithm.</p><pre class="codeinput">shortestPath(dg,<span class="string">'A'</span>,<span class="string">'K'</span>)
+</pre><pre class="codeoutput">
+ans = 
+
+    'A'    'B'    'I'    'F'    'K'
+
+</pre><p><tt>P = <b>shortestPath</b>(DG,SOURCE,TARGET)</tt> will return a <i>sequential</i> cell array <tt>P</tt>. If <tt>hasPath</tt> from <tt>SOURCE</tt> to <tt>TARGET</tt> returns false, then <tt>P</tt> will be empty, otherwise <tt>P</tt> will have a sequence of vertex names such that</p><p><tt>SOURCE = P{1} <img src="example_eq01535.png" alt="$\rightarrow$"> P{2} <img src="example_eq47555.png" alt="$\rightarrow \cdots \rightarrow$"> P{end} = TARGET</tt>.</p><p>If <tt>SOURCE</tt> and <tt>TARGET</tt> are the same, <tt>hasPath</tt> will always return true and <tt>shortestPath</tt> will have exactly one element.</p><h2>Union, Intersect, and Copy<a name="25"></a></h2><p>Combine and copy entire digraphs:</p><pre class="codeinput">c = copy(dg)
+</pre><pre class="codeoutput">
+c = 
+
+  digraph with properties:
+
+         AdjMat: [11x11 double]
+         Vertex: {'A'  'B'  'C'  'D'  'E'  'F'  'G'  'H'  'I'  'J'  'K'}
+    NumVertices: 11
+       NumEdges: 10
+
+</pre><p>This makes a "deep" copy, such that <tt>dg</tt> and <tt>c</tt> are completely independent:</p><pre class="codeinput">addVertex(c,<span class="string">'foo'</span>)
+hasVertex(c,<span class="string">'foo'</span>) <span class="comment">% c should contain "foo"</span>
+hasVertex(dg,<span class="string">'foo'</span>) <span class="comment">% dg should NOT contain "foo"</span>
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+
+ans =
+
+     0
+
+</pre><p>Taking the <b>union</b> of <tt>dg</tt> and <tt>c</tt> will use the union of the vertices and the edges available in <i>either</i> digraph:</p><pre class="codeinput">union(dg,c)
+</pre><pre class="codeoutput">
+ans = 
+
+  digraph with properties:
+
+         AdjMat: [12x12 double]
+         Vertex: {1x12 cell}
+    NumVertices: 12
+       NumEdges: 10
+
+</pre><p>Taking the <b>intersect</b> of <tt>dg</tt> and <tt>c</tt> will use the intersect of the vertices and the edges between them that are found in <i>both</i> digraphs:</p><pre class="codeinput">intersect(dg,c)
+</pre><pre class="codeoutput">
+ans = 
+
+  digraph with properties:
+
+         AdjMat: [11x11 double]
+         Vertex: {'A'  'B'  'C'  'D'  'E'  'F'  'G'  'H'  'I'  'J'  'K'}
+    NumVertices: 11
+       NumEdges: 10
+
+</pre><h2>Transitive Closure<a name="29"></a></h2><p>The transitive closure of a digraph makes all implicit edges explicit. In other words, if you have that <i>A</i> <img src="example_eq01535.png" alt="$\rightarrow$"> <i>B</i> <img src="example_eq01535.png" alt="$\rightarrow$"> <i>C</i>, then <i>C</i> is in <i>A</i>'s transitive closure. The <tt>transitiveClosure</tt> function will create a new digraph with an additional edge from <i>A</i> onto <i>C</i>.</p><p>Here, notice how <tt>NumEdges</tt> grows to 35:</p><pre class="codeinput">tc = transitiveClosure(dg)
+</pre><pre class="codeoutput">
+tc = 
+
+  digraph with properties:
+
+         AdjMat: [11x11 double]
+         Vertex: {'A'  'B'  'C'  'D'  'E'  'F'  'G'  'H'  'I'  'J'  'K'}
+    NumVertices: 11
+       NumEdges: 35
+
+</pre><p>The original digraph will be a subset of its transitive closure:</p><pre class="codeinput">isEquivalent(tc, union(dg,tc))
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+</pre><pre class="codeinput">isEquivalent(dg, intersect(dg,tc))
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+</pre><h2>Minimal Edges<a name="33"></a></h2><p>This is in a sense the converse of <tt>transitiveClosure</tt>. If you have that <i>A</i> <img src="example_eq01535.png" alt="$\rightarrow$"> <i>B</i> <img src="example_eq01535.png" alt="$\rightarrow$"> <i>C</i> and <i>A</i> <img src="example_eq01535.png" alt="$\rightarrow$"> <i>C</i>, then the edge from <i>A</i> onto <i>C</i> is redundant since there is already an indirect edge through <i>B</i>. The <tt>minimalEdges</tt> function will create a new digraph that has the edge from <i>A</i> onto <i>C</i> removed.</p><p>Here, notice how <tt>NumEdges</tt> shrinks to 9:</p><pre class="codeinput">me = minimalEdges(dg)
+</pre><pre class="codeoutput">
+me = 
+
+  digraph with properties:
+
+         AdjMat: [11x11 double]
+         Vertex: {'A'  'B'  'C'  'D'  'E'  'F'  'G'  'H'  'I'  'J'  'K'}
+    NumVertices: 11
+       NumEdges: 9
+
+</pre><p>This will (conversely to the transitive closure) be a subset of the original:</p><pre class="codeinput">isEquivalent(dg, union(dg,me))
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+</pre><pre class="codeinput">isEquivalent(me, intersect(dg,me))
+</pre><pre class="codeoutput">
+ans =
+
+     1
+
+</pre><p class="footer">Copyright 2013-2014 The MathWorks, Inc.<br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Manipulating digraphs with Vertex labels
+% Copyright 2013-2014 The MathWorks, Inc.
+
+%%
+% Many directed graph, or *digraph*, applications drop the vertex labels to
+% focus on computations of the Adjacency Matrix, referring to the vertices
+% only by their indices. The |digraph| class attempts to provide a
+% convenient interface for those that require to know what the vertex
+% actually represents.
+
+%%
+% This is a quick introduction to how to get started using |digraph|, but
+% executing
+%
+%   help digraph
+% 
+% will provide links to read about more in-depth functionality, while
+%
+%   methods digraph
+%
+% lists all valid functions that can be used with the digraph.
+
+%% Construct a new digraph
+% Start by creating a blank digraph object:
+dg = digraph
+
+%% Vertices
+% Add vertex labels to the digraph. The labels must be strings.
+addVertex(dg,'A')
+addVertex(dg,'B')
+addVertex(dg,'C')
+addVertex(dg,'D')
+addVertex(dg,'E')
+addVertex(dg,'F')
+addVertex(dg,'G')
+addVertex(dg,'H')
+addVertex(dg,'I')
+addVertex(dg,'J')
+addVertex(dg,'K')
+
+%% Edges
+% To represent an edge from _A_ onto _B_, the syntax is predictably
+addEdge(dg,'A','B')
+%%
+% Add others one at a time:
+addEdge(dg,'B','I')
+addEdge(dg,'C','D')
+addEdge(dg,'D','I')
+addEdge(dg,'I','E')
+addEdge(dg,'E','F')
+addEdge(dg,'I','F')
+addEdge(dg,'I','G')
+addEdge(dg,'G','H')
+addEdge(dg,'F','K')
+%%
+% Now our digraph is something substantial:
+dg
+
+%% Adjacency Matrix
+% The Adjacency Matrix, shortened to *|AdjMat|*, is a matrix representation
+% of the edges. |AdjMat|(_i_, _j_) is true if and only if there is an edge
+% from vertex _i_ to vertex _j_.
+%
+% Thus the following are equivalent, either using the succinct |hasEdge|
+% function:
+hasEdge(dg,'A','B')
+%%
+% Or by using Vertex indices to access the |AdjMat| directly:
+[foundA,i] = hasVertex(dg,'A');
+[foundB,j] = hasVertex(dg,'B');
+if foundA && foundB % make sure they were each found
+    edge = dg.AdjMat(i,j)
+end
+
+%%
+% See <matlab:doc('assertVertex') assertVertex> for a stricter
+% version of |hasVertex| and <matlab:doc('removeVertex')
+% removeVertex> to learn more about accessing indices directly. Using the
+% indices is a more advanced maneuver, to be used only when it is more
+% convenient. The beauty of the digraph implementation is that you
+% *don't* (and shouldn't!) have to track the corresponding index.
+
+%%
+% As gleened from the output above, the |AdjMat| is stored as a
+% <matlab:doc('sparse') sparse> matrix, whose display can be hard to read:
+dg.AdjMat
+%%
+% View it as a full matrix by using <matlab:doc('full') full>. This is
+% *not* advised for large matrices for the sake of memory.
+full(dg.AdjMat)
+
+%% Subgraphs
+% Create subgraphs of your digraph by specifying the vertices. This will
+% return a new digraph:
+subgraph(dg,{'C','D','G','H'})
+
+%% Finding Edges
+% Find all vertices that _I_ directly (explicitly) points to:
+findall(dg,'I',1)
+%%
+% and those that directly point to _I_:
+findall(dg,'I',-1)
+%%
+% Find all vertices that _I_ directly or indirectly (implicitly) points to:
+findall(dg,'I',Inf)
+%%
+% and those that directly or indirectly point to _I_:
+findall(dg,'I',-Inf)
+%%
+% Find all vertices that are at most 3 edges "ahead" of _A_:
+findall(dg,'A',3)
+
+%%
+% |findall| will always return a _sorted_ cell array.
+
+%% Finding Paths
+% See if two vertices are linked by an edge directly:
+hasEdge(dg,'A','K')
+%%
+% or indirectly.
+hasPath(dg,'A','K')
+%%
+% Find the shortest path from one to the other. This implements Dijkstra's
+% algorithm.
+shortestPath(dg,'A','K')
+
+%%
+% |P = *shortestPath*(DG,SOURCE,TARGET)| will return a _sequential_ cell
+% array |P|. If |hasPath| from |SOURCE| to |TARGET| returns false, then |P|
+% will be empty, otherwise |P| will have a sequence of vertex names such
+% that
+%
+% |SOURCE = P{1} $\rightarrow$ P{2} $\rightarrow \cdots \rightarrow$
+% P{end} = TARGET|.
+
+%%
+% If |SOURCE| and |TARGET| are the same, |hasPath| will always return true
+% and |shortestPath| will have exactly one element.
+
+%% Union, Intersect, and Copy
+% Combine and copy entire digraphs:
+c = copy(dg)
+
+%%
+% This makes a "deep" copy, such that |dg| and |c| are completely
+% independent:
+addVertex(c,'foo')
+hasVertex(c,'foo') % c should contain "foo"
+hasVertex(dg,'foo') % dg should NOT contain "foo"
+
+%%
+% Taking the *union* of |dg| and |c| will use the union of the vertices and
+% the edges available in _either_ digraph:
+union(dg,c)
+
+%%
+% Taking the *intersect* of |dg| and |c| will use the intersect of the
+% vertices and the edges between them that are found in _both_ digraphs:
+intersect(dg,c)
+
+%% Transitive Closure
+% The transitive closure of a digraph makes all implicit edges explicit. In
+% other words, if you have that _A_ $\rightarrow$ _B_ $\rightarrow$ _C_,
+% then _C_ is in _A_'s transitive closure. The |transitiveClosure| function
+% will create a new digraph with an additional edge from _A_ onto _C_.
+
+%%
+% Here, notice how |NumEdges| grows to 35:
+tc = transitiveClosure(dg)
+
+%%
+% The original digraph will be a subset of its transitive closure:
+isEquivalent(tc, union(dg,tc))
+%%
+isEquivalent(dg, intersect(dg,tc))
+
+%% Minimal Edges
+% This is in a sense the converse of |transitiveClosure|. If you have that
+% _A_ $\rightarrow$ _B_ $\rightarrow$ _C_ and _A_ $\rightarrow$ _C_, then
+% the edge from _A_ onto _C_ is redundant since there is already an
+% indirect edge through _B_. The |minimalEdges| function will create a new
+% digraph that has the edge from _A_ onto _C_ removed.
+
+%%
+% Here, notice how |NumEdges| shrinks to 9:
+me = minimalEdges(dg)
+
+%%
+% This will (conversely to the transitive closure) be a subset of the
+% original:
+isEquivalent(dg, union(dg,me))
+%%
+isEquivalent(me, intersect(dg,me))
+
+##### SOURCE END #####
+--></body></html>
