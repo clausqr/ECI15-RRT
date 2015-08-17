@@ -12,8 +12,8 @@ delta_theta = input(2);  %commanded steering change in angle
 newv = v + delta_v;
 newtheta = theta + delta_theta;
 
-newx = x + v*cos(theta);
-newy = y + v*sin(theta);
+newx = x + newv*cos(newtheta);
+newy = y + newv*sin(newtheta);
 newz = z;
 
 newstate = [newx; newy; newz; newv; newtheta];

@@ -22,6 +22,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         edgeToVertexId
         EdgesListLength
         
+        % Debug
+        Debug
     end
     
     properties (Access = private)
@@ -95,30 +97,74 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             obj.SelectWhereToGrowToFcn = SelectWhereToGrowToFcn;
             obj.GrowthInputsFcn = GrowthInputsFcn;
             
+            % Debug state
+            obj.Debug = true;
+            
         end
         
+        % Grow function, here is where all the RRT magic happens
         function obj = Grow(obj)
             
             NewStateToGrowTo = obj.SelectWhereToGrowToFcn();
-            VerticesToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo);
+            VertexToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo);
             
-            from = obj.vertixState(:,VerticesToGrowId);
-            to = NewStateToGrowTo;
-            u = obj.GrowthInputsFcn(from, to);
+            if obj.Debug
+                h1 = PlotState(NewStateToGrowTo, 'xr');
+                p = obj.vertixState(:,VertexToGrowId);
+                h2 = PlotState(p, 'xg');
+                h3 = line([p(1) NewStateToGrowTo(1)],...
+                            [p(2) NewStateToGrowTo(2)],...
+                            'LineStyle', ':');
+                drawnow update
+            end
+            
+            
+            
+            fromState = obj.vertixState(:,VertexToGrowId);
+            toState = NewStateToGrowTo;
+            
+            u = obj.GrowthInputsFcn(fromState, toState);
             
             NewStateToAdd = obj.StateTransitionFcn(...
-                from,...
-                u);
-            
+                                                    fromState,...
+                                                    u);
+            if obj.Debug
+                % pause(1)
+                h4 = PlotState(NewStateToAdd, '*r');
+                p = obj.vertixState(:,VertexToGrowId);
+                h5 = PlotState(p, '*g');
+                h6 = line([p(1) NewStateToAdd(1)],...
+                            [p(2) NewStateToAdd(2)],...
+                            'Color', 'Red');
+                drawnow update
+            end
+                                                
             VerticesToAddId = obj.AddVertexFromState(NewStateToAdd);
-            obj.AddEdge(VerticesToGrowId,...
+            
+            obj.AddEdge(VertexToGrowId,...
                 VerticesToAddId,...
                 u);
+            
+            if obj.Debug
+                % pause(1);
+                delete(h1)
+                delete(h2)
+                delete(h3)
+                delete(h4)
+                delete(h5)
+                delete(h6)
+                drawnow update
+            end
+                      
+            PlotLineBetweenStates(obj.vertixState(:, VertexToGrowId),...
+                                    obj.vertixState(:, VerticesToAddId), '');
+  
             
         end
         
         function vids = SelectVerticesToGrowFrom(obj, NewStateToGrowTo)
             vids = obj.getNearestVertexId(NewStateToGrowTo);
+            vids = vids(1);
         end
         
         function obj = AddEdge(obj, vFromId, vToId, Controls)
@@ -182,12 +228,4 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         end
     end
     
-    methods (Static)
-        
-        function v = CreateVertexFromState(obj, State)
-            v.State = State;
-            v.id = obj.VerticesListLength+1;      %//TODO change to id = hash
-            
-        end
-    end
 end

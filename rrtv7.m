@@ -7,13 +7,13 @@ N_robots = 2;
 
 % Starting position, attitude and initial velocity
 Path.Start.pos(:,1) = [0.1; 0.1; 0.5];
-Path.Start.vel(:,1) = 0.02;
-Path.Start.ang(:,1) = pi/3;
+Path.Start.vel(:,1) = 0.01;
+Path.Start.ang(:,1) = -pi/2;
 
 % Starting position, attitude and initial velocity
 Path.Start.pos(:,2) = [0.2; 0.1; 0.5];
-Path.Start.vel(:,2) = 0.02;
-Path.Start.ang(:,2) = pi/6;
+Path.Start.vel(:,2) = 0.01;
+Path.Start.ang(:,2) = -pi/2;
 
 
 % Goal and goal size.
@@ -68,8 +68,8 @@ for i = 1:200
         
         g(k).Grow();
 
-        p = g(k).vertixState(1:2,k);
-        PlotPoint(p,'ob');
+        p = g(k).vertixState(:,i);
+        %PlotState(p, 'ob');
         drawnow update
     end
     
