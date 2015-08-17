@@ -7,24 +7,26 @@ N_robots = 2;
 
 % Starting position, attitude and initial velocity
 Path.Start.pos(:,1) = [0.1; 0.1; 0.5];
-Path.Start.vel(:,1) = 0.01;
+Path.Start.vel(:,1) = 0.02;
 Path.Start.ang(:,1) = -pi/2;
 
 % Starting position, attitude and initial velocity
 Path.Start.pos(:,2) = [0.2; 0.1; 0.5];
-Path.Start.vel(:,2) = 0.01;
+Path.Start.vel(:,2) = 0.02;
 Path.Start.ang(:,2) = -pi/2;
 
 
 % Goal and goal size.
 Path.Goal.pos(:,1) = [0.9; 0.9; 0.5];
+Path.Goal.state = [Path.Goal.pos(:,1); 0; 0];
 Path.Goal.Radius(1) = 0.125;
 Path.Goal.pos(:,2) = [0.8; 0.9; 0.5];
+Path.Goal.state = [Path.Goal.pos(:,1); 0; 0];
 Path.Goal.Radius(2) = 0.125;
 
 % our world is a square [0; 1]x[0; 1], the following image represents
 % this square, ObstacleMap is a matrix of the same size as the image.
-World.ObstacleMap = LoadObstacles('shape2.jpg');
+w = World('shape3.jpg');
 
 % plot starting positions and goal
 for k = 1:N_robots
@@ -50,7 +52,10 @@ for k = 1:N_robots
     g(k) = RRT(@DistanceXYFrom5State,...
                 @StateUpdateFcn2DAngle,...
                 @getNewRandomState,...
-                @CalculateInputsXtoY5State);
+                @CalculateInputsXtoY5State,...
+                @ControlsShuffle,...
+                w);
+            
     % Add the starting vertex to the RRT graph
     g(k).AddVertexFromState(InitialState{k});
     
@@ -58,26 +63,23 @@ end
 
 hold on
 
-
-sigma_delta_v = 0.0;
-sigma_delta_theta = 2*pi/2;
-
-for i = 1:200
+N_iterations = 400;
+d = zeros(N_robots, N_iterations);
+for i = 1:N_iterations
     for k = 1:N_robots
         
-        
         g(k).Grow();
+        d(k, i) = g(k).getDistanceToState(Path.Goal.state);
 
-        p = g(k).vertixState(:,i);
-        %PlotState(p, 'ob');
         drawnow update
     end
     
 end
 
-
-
-
+figure
+plot(d(1,:))
+hold on
+plot(d(2,:))
 
 
 
