@@ -1,4 +1,4 @@
-function u = CalculateInputsXtoY5State(x, y)
+function u = InverseKinematicsFcn(x, y)
 
 AngleYtoX = atan2(y(2)-x(2), y(1)-x(1));
 
