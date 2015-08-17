@@ -12,7 +12,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         %  Vertix variables
         vertixState
         vertixId
-        vertixIsExpandable
+        vertixChildren
+        vertixFailedToExpandTimes
         VerticesListLength
         
         %  Edgevariables
@@ -21,7 +22,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         edgeFromVertexId
         edgeToVertexId
         EdgesListLength
-        
+                
         % Debug
         Debug
     end
@@ -42,6 +43,10 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         SelectWhereToGrowToFcn
         %   calculate inputs to go from state x to y
         GrowthInputsFcn
+        % Function to shuffle controls and produce the branching
+        ControlShuffleFcn
+        % world! (encapsulates Cfree checking methods)
+        w
         
     end
     
@@ -64,7 +69,9 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         function obj = RRT(DistanceFcn,...
                 StateTransitionFcn,...
                 SelectWhereToGrowToFcn,...
-                GrowthInputsFcn)
+                GrowthInputsFcn,...
+                ControlShuffleFcn,...
+                WorldObject)
             %RRT creates an empty RRT object .
             %  Example:
             %   R = RRT(DistanceFcn)
@@ -76,7 +83,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             % Initialize vertices
             obj.vertixState = [];
             obj.vertixId = [];
-            obj.vertixIsExpandable = [];
+            obj.vertixChildren = [];
+            obj.vertixFailedToExpandTimes = [];
             obj.VerticesListLength = 0;
             
             % Initialize edges
@@ -89,32 +97,36 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             % Initialize connectivity graph
             obj.graph = digraph();
             
-            
-            
-            % Register Distance function
+            % Register state manipulation functions
             obj.DistanceFcn = DistanceFcn;
             obj.StateTransitionFcn = StateTransitionFcn;
             obj.SelectWhereToGrowToFcn = SelectWhereToGrowToFcn;
             obj.GrowthInputsFcn = GrowthInputsFcn;
+            obj.ControlShuffleFcn = ControlShuffleFcn;
+            
+            
+            % Register World Object
+            obj.w = WorldObject;
             
             % Debug state
-            obj.Debug = true;
+            obj.Debug = false;
             
         end
         
         % Grow function, here is where all the RRT magic happens
         function obj = Grow(obj)
             
+            
             NewStateToGrowTo = obj.SelectWhereToGrowToFcn();
-            VertexToGrowId = obj.SelectVerticesToGrowFrom(NewStateToGrowTo);
+            VertexToGrowId = obj.SelectVertixToGrowFrom(NewStateToGrowTo);
             
             if obj.Debug
                 h1 = PlotState(NewStateToGrowTo, 'xr');
                 p = obj.vertixState(:,VertexToGrowId);
                 h2 = PlotState(p, 'xg');
                 h3 = line([p(1) NewStateToGrowTo(1)],...
-                            [p(2) NewStateToGrowTo(2)],...
-                            'LineStyle', ':');
+                    [p(2) NewStateToGrowTo(2)],...
+                    'LineStyle', ':');
                 drawnow update
             end
             
@@ -123,48 +135,84 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             fromState = obj.vertixState(:,VertexToGrowId);
             toState = NewStateToGrowTo;
             
-            u = obj.GrowthInputsFcn(fromState, toState);
+            % Generate controls if we want to expand right into the
+            % randomly chosen state
+            ControlInputs = obj.GrowthInputsFcn(fromState, toState);
+            % and shuffle these controls to produce branching.
+            ShuffledControlInputs = obj.ControlShuffleFcn(ControlInputs);
             
-            NewStateToAdd = obj.StateTransitionFcn(...
-                                                    fromState,...
-                                                    u);
-            if obj.Debug
-                % pause(1)
-                h4 = PlotState(NewStateToAdd, '*r');
-                p = obj.vertixState(:,VertexToGrowId);
-                h5 = PlotState(p, '*g');
-                h6 = line([p(1) NewStateToAdd(1)],...
-                            [p(2) NewStateToAdd(2)],...
-                            'Color', 'Red');
-                drawnow update
+            % Take into account the number of expanded branches.
+            BranchesCount = size(ShuffledControlInputs, 2);
+            ExpandedBranches = 0;
+            
+            for k = 1:BranchesCount
+                
+                u = ShuffledControlInputs(:,k);
+                
+                NewStateToAdd = obj.StateTransitionFcn(...
+                    fromState,...
+                    u);
+                
+                if obj.Debug
+                    % pause(1)
+                    h4 = PlotState(NewStateToAdd, '*r');
+                    p = obj.vertixState(:,VertexToGrowId);
+                    h5 = PlotState(p, '*g');
+                    h6 = line([p(1) NewStateToAdd(1)],...
+                        [p(2) NewStateToAdd(2)],...
+                        'Color', 'Red');
+                    drawnow update
+                end
+                
+                if obj.w.PolygonIsInCFree([fromState NewStateToAdd])
+                    
+                    ExpandedBranches = ExpandedBranches + 1;
+                    AddedVertexId = obj.AddVertexFromState(NewStateToAdd);
+                    
+                    obj.AddEdge(VertexToGrowId,...
+                        AddedVertexId,...
+                        u);
+                    
+                    PlotLineBetweenStates(obj.vertixState(:, VertexToGrowId),...
+                        obj.vertixState(:, AddedVertexId), '');
+                end
+                
+                if obj.Debug
+                    % pause(1);
+                    delete(h4)
+                    delete(h5)
+                    delete(h6)
+                    drawnow update
+                end
+                
             end
-                                                
-            VerticesToAddId = obj.AddVertexFromState(NewStateToAdd);
             
-            obj.AddEdge(VertexToGrowId,...
-                VerticesToAddId,...
-                u);
+
+            % Take note of the times we have expanded this vertex...
+            obj.vertixChildren(VertexToGrowId) =... 
+             obj.vertixChildren(VertexToGrowId) + ExpandedBranches;
+            % and how many times we failed to expand it.
+            obj.vertixFailedToExpandTimes(VertexToGrowId) =...
+                obj.vertixFailedToExpandTimes(VertexToGrowId) +...
+                BranchesCount - ExpandedBranches;
             
             if obj.Debug
                 % pause(1);
                 delete(h1)
                 delete(h2)
                 delete(h3)
-                delete(h4)
-                delete(h5)
-                delete(h6)
+                
                 drawnow update
             end
-                      
-            PlotLineBetweenStates(obj.vertixState(:, VertexToGrowId),...
-                                    obj.vertixState(:, VerticesToAddId), '');
-  
             
         end
         
-        function vids = SelectVerticesToGrowFrom(obj, NewStateToGrowTo)
-            vids = obj.getNearestVertexId(NewStateToGrowTo);
-            vids = vids(1);
+        function vid = SelectVertixToGrowFrom(obj, NewStateToGrowTo)
+            
+            vid = obj.getNearestVertexId(NewStateToGrowTo);
+
+            vid = vid(1);
+
         end
         
         function obj = AddEdge(obj, vFromId, vToId, Controls)
@@ -197,7 +245,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             % fill in with vertex properties
             obj.vertixState(:, n+1) = State;
             obj.vertixId(n+1) = id;
-            obj.vertixIsExpandable = true;
+            obj.vertixChildren(n+1) = 0;
+            obj.vertixFailedToExpandTimes(n+1) = 0;
             
             % add vertex to vertex connectivity graph
             obj.graph.addVertex(id);
@@ -209,11 +258,17 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         
         function id = getNearestVertexId(obj, TargetState)
             
-            
             distance_to_vertices = obj.getDistancesPointToVertices(obj.vertixState,...
                 TargetState);
             id = obj.vertixId(distance_to_vertices == min(distance_to_vertices));
             
+        end
+        
+        function d = getDistanceToState(obj, TargetState)
+            
+            distance_to_vertices = obj.getDistancesPointToVertices(obj.vertixState,...
+                TargetState);
+            d = min(distance_to_vertices);
         end
         
     end

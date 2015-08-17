@@ -1,15 +1,13 @@
-function isIt = isInCFree(M, a)
-
-[ny, nx, nz] = size(M);
+function isIt = PolygonIsInCFree(obj, a)
 
 % Only take x and y coordinates, discard z.
-xi = ceil(nx*a(1, :));
-yi = ceil(ny*a(2, :));
+xi = ceil(obj.nx*a(1, :));
+yi = ceil(obj.ny*a(2, :));
 
-xi = checkBounds(xi, nx);
-yi = checkBounds(yi, ny);
+xi = checkBounds(xi, obj.nx);
+yi = checkBounds(yi, obj.ny);
 
-c = improfile(M, xi, yi);
+c = improfile(obj.ObstacleMap, xi, yi);
 
 p1 = sum(c,3);
 
