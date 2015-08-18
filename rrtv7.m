@@ -2,8 +2,8 @@
 % script to test and run the RRT path finder
 clear
 hold off
-% amount of robots
-N_robots = 2;
+% amount of Agents
+N_Agents = 2;
 
 % Starting position, attitude and initial velocity
 Path.Start.pos(:,1) = [0.1; 0.1; 0.5];
@@ -29,7 +29,7 @@ Path.Goal.Radius(2) = 0.125;
 w = World('shape3.jpg');
 
 % plot starting positions and goal
-for k = 1:N_robots
+for k = 1:N_Agents
     hold on
     PlotCircle(Path.Start.pos(:,k), Path.Goal.Radius(k)/8, 3, 'Green');
     PlotPoint(Path.Start.pos(:,k), '*g');
@@ -39,21 +39,17 @@ end
 
 
 
-for k = 1:N_robots
+for k = 1:N_Agents
     
-    % Construct the state vector of the k-th robot
+    % Construct the state vector of the k-th Agent
     InitialState{k} = [Path.Start.pos(:,k);
         Path.Start.vel(:,k);
         Path.Start.ang(:,k)];
     
-    % Initialize the robot
-    r(k) = Robot(InitialState{k});
+    % Initialize the Agent
+    r(k) = Agent(UAV(InitialState{k}));
     
-    g(k) = RRT(@DistanceXYFrom5State,...
-                @StateUpdateFcn2DAngle,...
-                @getNewRandomState,...
-                @CalculateInputsXtoY5State,...
-                @ControlsShuffle,...
+    g(k) = RRT(r(k),...
                 w);
             
     % Add the starting vertex to the RRT graph
@@ -64,9 +60,9 @@ end
 hold on
 
 N_iterations = 400;
-d = zeros(N_robots, N_iterations);
+d = zeros(N_Agents, N_iterations);
 for i = 1:N_iterations
-    for k = 1:N_robots
+    for k = 1:N_Agents
         
         g(k).Grow();
         d(k, i) = g(k).getDistanceToState(Path.Goal.state);
