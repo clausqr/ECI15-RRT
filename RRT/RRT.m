@@ -25,9 +25,15 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                 
         % Debug
         Debug
+        
+                % world! (encapsulates Cfree checking methods)
+        w 
+        
+        % agent encapsulates the properties of the robot or UAV being used.
+        a 
     end
     
-    properties (Access = private)
+    properties (Access = protected)
         
         % Graph to hide the graph structure, properties and methods. For
         % the time being we use this from digraph class.
@@ -45,8 +51,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         GrowthInputsFcn
         % Function to shuffle controls and produce the branching
         ControlShuffleFcn
-        % world! (encapsulates Cfree checking methods)
-        w
+
         
     end
     
@@ -66,12 +71,7 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
     
     methods (Access = public)
         
-        function obj = RRT(DistanceFcn,...
-                StateTransitionFcn,...
-                SelectWhereToGrowToFcn,...
-                GrowthInputsFcn,...
-                ControlShuffleFcn,...
-                WorldObject)
+        function obj = RRT(AgentObject, WorldObject)
             %RRT creates an empty RRT object .
             %  Example:
             %   R = RRT(DistanceFcn)
@@ -98,12 +98,12 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             obj.graph = digraph();
             
             % Register state manipulation functions
-            obj.DistanceFcn = DistanceFcn;
-            obj.StateTransitionFcn = StateTransitionFcn;
-            obj.SelectWhereToGrowToFcn = SelectWhereToGrowToFcn;
-            obj.GrowthInputsFcn = GrowthInputsFcn;
-            obj.ControlShuffleFcn = ControlShuffleFcn;
-            
+            obj.a = AgentObject;
+            obj.DistanceFcn = obj.a.DistanceInStateSpace;
+            obj.StateTransitionFcn = obj.a.StateTransitionFcn;
+            obj.SelectWhereToGrowToFcn = obj.a.getNewRandomState;
+            obj.GrowthInputsFcn = obj.a.InverseKinematics;
+            obj.ControlShuffleFcn = obj.a.ControlShuffleFcn;
             
             % Register World Object
             obj.w = WorldObject;
@@ -121,9 +121,9 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             VertexToGrowId = obj.SelectVertixToGrowFrom(NewStateToGrowTo);
             
             if obj.Debug
-                h1 = PlotState(NewStateToGrowTo, 'xr');
+                h1 = obj.a.r.PlotState(NewStateToGrowTo, 'xr');
                 p = obj.vertixState(:,VertexToGrowId);
-                h2 = PlotState(p, 'xg');
+                h2 = obj.a.r.PlotState(p, 'xg');
                 h3 = line([p(1) NewStateToGrowTo(1)],...
                     [p(2) NewStateToGrowTo(2)],...
                     'LineStyle', ':');
@@ -155,9 +155,9 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                 
                 if obj.Debug
                     % pause(1)
-                    h4 = PlotState(NewStateToAdd, '*r');
+                    h4 = obj.a.r.PlotState(NewStateToAdd, '*r');
                     p = obj.vertixState(:,VertexToGrowId);
-                    h5 = PlotState(p, '*g');
+                    h5 = obj.a.r.PlotState(p, '*g');
                     h6 = line([p(1) NewStateToAdd(1)],...
                         [p(2) NewStateToAdd(2)],...
                         'Color', 'Red');
@@ -173,8 +173,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                         AddedVertexId,...
                         u);
                     
-                    PlotLineBetweenStates(obj.vertixState(:, VertexToGrowId),...
-                        obj.vertixState(:, AddedVertexId), '');
+                    obj.a.r.PlotStateTransition(obj.vertixState(:, VertexToGrowId),...
+                        obj.vertixState(:, AddedVertexId), '', '-');
                 end
                 
                 if obj.Debug
