@@ -99,11 +99,6 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             
             % Register state manipulation functions
             obj.a = AgentObject;
-            obj.DistanceFcn = obj.a.DistanceInStateSpace;
-            obj.StateTransitionFcn = obj.a.StateTransitionFcn;
-            obj.SelectWhereToGrowToFcn = obj.a.getNewRandomState;
-            obj.GrowthInputsFcn = obj.a.InverseKinematics;
-            obj.ControlShuffleFcn = obj.a.ControlShuffleFcn;
             
             % Register World Object
             obj.w = WorldObject;
@@ -117,7 +112,9 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         function obj = Grow(obj)
             
             
-            NewStateToGrowTo = obj.SelectWhereToGrowToFcn();
+            % NewStateToGrowTo = obj.SelectWhereToGrowToFcn(); 
+            % //TODO: Use function handle to better encapsulate agents.
+            NewStateToGrowTo = obj.a.getNewRandomState();
             VertexToGrowId = obj.SelectVertixToGrowFrom(NewStateToGrowTo);
             
             if obj.Debug
@@ -137,9 +134,14 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             
             % Generate controls if we want to expand right into the
             % randomly chosen state
-            ControlInputs = obj.GrowthInputsFcn(fromState, toState);
+            % //TODO: Use function handle to better encapsulate agents.
+            %ControlInputs = obj.GrowthInputsFcn(fromState, toState);
+            ControlInputs = obj.a.InverseKinematicsFcn(fromState, toState);
+            
             % and shuffle these controls to produce branching.
-            ShuffledControlInputs = obj.ControlShuffleFcn(ControlInputs);
+            % //TODO: Use function handle to better encapsulate agents.
+            %ShuffledControlInputs = obj.ControlShuffleFcn(ControlInputs);
+            ShuffledControlInputs = obj.a.ControlsShuffle(ControlInputs);
             
             % Take into account the number of expanded branches.
             BranchesCount = size(ShuffledControlInputs, 2);
@@ -149,7 +151,10 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                 
                 u = ShuffledControlInputs(:,k);
                 
-                NewStateToAdd = obj.StateTransitionFcn(...
+               % //TODO: Use function handle to better encapsulate agents.
+
+%                 NewStateToAdd = obj.StateTransitionFcn(...
+                NewStateToAdd = obj.a.StateTransitionFcn(...
                     fromState,...
                     u);
                 
@@ -173,8 +178,8 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
                         AddedVertexId,...
                         u);
                     
-                    obj.a.r.PlotStateTransition(obj.vertixState(:, VertexToGrowId),...
-                        obj.vertixState(:, AddedVertexId), '', '-');
+                    obj.a.PlotStateTransition(obj.vertixState(:, VertexToGrowId),...
+                        obj.vertixState(:, AddedVertexId));
                 end
                 
                 if obj.Debug
@@ -278,8 +283,10 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
         
         function d = getDistancesPointToVertices(obj, vertices, point)
             rays = bsxfun(@minus, vertices, point);
-            dfcn = obj.DistanceFcn;
-            d = arrayfun(@(idx) dfcn(zeros(size(point)), rays(:,idx)), 1:size(rays,2));
+            % //TODO: Use function handle to better encapsulate agents.
+            %dfcn = obj.DistanceFcn;
+            %d = arrayfun(@(idx) dfcn(zeros(size(point)), rays(:,idx)), 1:size(rays,2));
+            d = arrayfun(@(idx) obj.a.DistanceInStateSpace(zeros(size(point)), rays(:,idx)), 1:size(rays,2));
         end
     end
     
