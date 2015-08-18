@@ -1,6 +1,5 @@
 classdef World < matlab.mixin.Copyable
     % RRT Rapid-growing Random Tree class, implementing the RRT pathfinder.
-    %
     % (c) https://github.com/clausqr for ECI2015
     %
     % inspired by digraph class, it uses it in the insides...

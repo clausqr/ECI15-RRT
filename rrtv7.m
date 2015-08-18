@@ -2,8 +2,13 @@
 % script to test and run the RRT path finder
 clear
 hold off
+addpath('digraph')
+addpath('World')
+addpath('UAV')
+addpath('RRT')
+
 % amount of Agents
-N_Agents = 2;
+N_Agents = 1;
 
 % Starting position, attitude and initial velocity
 Path.Start.pos(:,1) = [0.1; 0.1; 0.5];
