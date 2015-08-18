@@ -1,4 +1,4 @@
-function u = InverseKinematicsFcn(x, y)
+function u = InverseKinematicsFcn(obj, x, y)
 
 AngleYtoX = atan2(y(2)-x(2), y(1)-x(1));
 

@@ -1,4 +1,4 @@
-% rrtv6
+% rrtv7
 % script to test and run the RRT path finder
 clear
 hold off
@@ -47,7 +47,7 @@ for k = 1:N_Agents
         Path.Start.ang(:,k)];
     
     % Initialize the Agent
-    r(k) = Agent(UAV(InitialState{k}));
+    r(k) = UAV(InitialState{k});
     
     g(k) = RRT(r(k),...
                 w);
