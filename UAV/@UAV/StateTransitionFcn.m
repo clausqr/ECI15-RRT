@@ -1,4 +1,4 @@
-function newstate = StateUpdateFcn2DAngle(state, input)
+function newstate = StateTransitionFcn(state, input)
 
 x = state(1);       %pos.x
 y = state(2);       %pos.y
