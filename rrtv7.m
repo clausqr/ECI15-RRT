@@ -20,7 +20,6 @@ Path.Start.pos(:,2) = [0.2; 0.1; 0.5];
 Path.Start.vel(:,2) = 0.025;
 Path.Start.ang(:,2) = -pi/2;
 
-
 % Goal and goal size.
 Path.Goal.pos(:,1) = [0.9; 0.9; 0.5];
 Path.Goal.state = [Path.Goal.pos(:,1); 0; 0];
@@ -65,8 +64,12 @@ end
 
 hold on
 
+% Max number of iterations
 N_iterations = 400;
+% initialize distance logging into d, d(i, k) is the k-th agent distance to
+% the goal on the i-th iteration
 d = zeros(N_Agents, N_iterations);
+
 for i = 1:N_iterations
     for k = 1:N_Agents
         
