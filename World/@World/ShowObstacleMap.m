@@ -4,7 +4,7 @@ function h = ShowObstacleMap(obj)
     %   object W, and returns a graphics handle H.
     %
     % (c) https://github.com/clausqr for ECI2015    
-obj = obj.ObstacleMap;
+M = obj.ObstacleMap;
 nx = obj.nx;
 ny = obj.ny;
 nz = obj.nz;

@@ -1,5 +1,8 @@
 function u = InverseKinematicsFcn(obj, x, y)
-
+% INVERSEKINEMATICS Inverse Dynamics (or Kinematics) function,
+%   finds the right control inputs to go towards a desired state, 
+% starting from the current state.        
+        
 AngleYtoX = atan2(y(2)-x(2), y(1)-x(1));
 
 current_state_angle = x(5);
