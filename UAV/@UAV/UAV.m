@@ -64,8 +64,9 @@ classdef UAV < handle
         
         h = PlotState(State, Style) % Function used to plot a state
         
-        PlotStateTransition(FromState, ToState, Controls, Style) % and to plot a transition between states
-        
+        PlotStateTransition(varargin) % and to plot a transition between states
+        %PlotStateTransition(FromState, ToState, Controls, Style, Width) % and to plot a transition between states
+  
     end
     
 end
