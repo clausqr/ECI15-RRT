@@ -55,8 +55,8 @@ for k = 1:N_Agents
     r(k) = UAV(InitialState{k});
     
     g(k) = RRT(r(k),...
-                w);
-            
+        w);
+    
     % Add the starting vertex to the RRT graph
     g(k).AddVertexFromState(InitialState{k});
     
@@ -65,26 +65,43 @@ end
 hold on
 
 % Max number of iterations
-N_iterations = 400;
-% initialize distance logging into d, d(i, k) is the k-th agent distance to
+N_max_iterations = 400;
+% initialize distance logging into d, d(k, i) is the k-th agent distance to
 % the goal on the i-th iteration
-d = zeros(N_Agents, N_iterations);
+d = zeros(N_Agents, N_max_iterations);
+% Initialize variables for the while loop
+i = 1;
+for k = 1:N_Agents
+    d(k, i) = g(k).getDistanceToState(Path.Goal.state);
+end
+Path.Goal.Reached = false;
 
-for i = 1:N_iterations
+while (i < N_max_iterations) && ~Path.Goal.Reached
+    
     for k = 1:N_Agents
         
         g(k).Grow();
         d(k, i) = g(k).getDistanceToState(Path.Goal.state);
-
+        
         drawnow update
     end
-    
+    Path.Goal.Reached = logical(d(k, i) < Path.Goal.Radius(1:N_Agents));
+    i = i+1;
 end
 
+% trim distance log
+d = d(:, 1:i-1);
+
+% plot convergence graphs
 figure
-plot(d(1,:))
-hold on
-plot(d(2,:))
+for k = 1:N_Agents
+    plot(d(k,:))
+    hold on
+end
+
+
+
+
 
 
 
