@@ -281,6 +281,36 @@ classdef RRT < matlab.mixin.Copyable  %handle    %
             d = min(distance_to_vertices);
         end
         
+        function [PathVerticesStates, PathEdgeControls] = FindPathBetweenStates(obj, FromState, ToState)
+           
+           % Get id from nearest vertices to states
+           FromStateId = obj.getNearestVertexId(FromState);
+           ToStateId = obj.getNearestVertexId(ToState);
+           % call method of digraph to find shortest path between nodes
+           PathVertixId = obj.graph.shortestPath(FromStateId, ToStateId);
+           EdgeCountAlongPath = numel(PathVertixId) - 1;
+          
+           PathEdgeId = zeros(1, EdgeCountAlongPath);
+           PathEdgeControls = zeros(size(obj.edgeControls(:,1),1),...
+               EdgeCountAlongPath);
+           PathVerticesStates = zeros(size(obj.vertixState(:,1),1),...
+               EdgeCountAlongPath);
+           
+           for k = 1:EdgeCountAlongPath
+               % find edge that connects 2 consecutive vertices along our
+               % path.
+             PathEdgeId(k) = obj.edgeId((obj.edgeFromVertexId == PathVertixId{k}) &...
+                 (obj.edgeToVertexId == PathVertixId{k+1}));
+             id = PathEdgeId(k);
+             PathEdgeControls(:,k) = obj.edgeControls(:, id);
+             id = PathVertixId(k);
+             PathVerticesStates(:,k) = obj.vertixState(:, cell2mat(id));
+           end
+           id = PathVertixId(k+1);
+           PathVerticesStates(:,k+1) = obj.vertixState(:, cell2mat(id));
+           
+        end
+        
     end
     
     

@@ -1,11 +1,8 @@
-function PlotPath(vertices, p)
+function PlotPath(States, Controls)
 
-p = cell2mat(p);
 
-for i = 1:(length(p)-1)
-    
-   edge = getNewRRTEdge(p(i), p(i+1));
+for i = 1:(length(States)-1)
+
+   UAV.PlotStateTransition(States(:,i), States(:,i+1), Controls(:,i), 'Red', 3);
    
-   PlotEdge(vertices, edge, 'Color', 'Red')
-
 end
