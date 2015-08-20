@@ -1,7 +1,12 @@
 classdef RRT < matlab.mixin.Copyable  %handle    %
     % RRT Rapid-growing Random Tree class, implementing the RRT pathfinder.
-    %
+    %   
     % (c) https://github.com/clausqr for ECI2015
+    %
+    %   Implements a RRT path finder, with the state manipulation functions
+    %   delegated to the agent class passed to constructor, and with C_free 
+    %   checking and obstacle avoidance delegated to the world class passed
+    %   to the constructor.
     %
     % inspired by digraph class, it uses it in the insides...
     %
