@@ -21,9 +21,11 @@ classdef UAV < handle
     methods (Access = public)
         
         % Constructor
-        function obj = UAV(InitialState)
-            
-            obj.Init(InitialState);
+        function obj = UAV(varargin)
+            if (nargin == 1)
+                % InitialState = varargin
+                obj.Init(varargin{1});
+            end
             
         end
         

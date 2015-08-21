@@ -40,7 +40,8 @@ end
 for k = 1:N_Agents
     
     % Initialize the Agent with the initial state vector of the k-th Agent
-    r(k) = UAV(Path.Start.state(:,k));
+    r(k) = UAV();
+    r(k).Init(Path.Start.state(:,k));
     
     g(k) = RRT(r(k),...
         w);
