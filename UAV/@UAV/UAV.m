@@ -47,6 +47,9 @@ classdef UAV < handle
             obj.CurrentIterationStep = k+1;
         end
 
+        % MOVED FROM STATIC
+                controls = InverseKinematicsFcn(obj, FromState, ToState)  % Inverse Dynamics (or Kinematics) function
+
     end
     
     % Following static methods are implemented here so they can be called
@@ -55,9 +58,7 @@ classdef UAV < handle
     methods (Static)
        
         newstate = StateTransitionFcn(State, Controls)  % State Transition function
-        
-        controls = InverseKinematics(FromState, ToState)  % Inverse Dynamics (or Kinematics) function
-        
+
         d = DistanceInStateSpace(x, y) % Function to compute distance between a pair of states
         
         us = ControlsShuffle(u) % Function used to generate several variations of a control input, used for branching

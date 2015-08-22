@@ -98,7 +98,13 @@ classdef SWARM < handle
         % and inputs.
         newstate = StateTransitionFcn(obj, State, Controls)  % State Transition function
 
-        
+        s = getNewRandomState(obj) % Function used to get a random point in state space
+        controls = InverseKinematicsFcn(obj, FromState, ToState)  % Inverse Dynamics (or Kinematics) function
+        us = ControlsShuffle(obj, u) % Shuffle the controls for branching and stuff
+        PlotStateTransition(obj, varargin) % and to plot a transition between states
+        d = DistanceInStateSpace(obj, x, y) % Function to compute distance between a pair of states
+        h = PlotState(obj, State, Style) % Function used to plot a state
+
     end
     
     % Following static methods are implemented here so they can be called
@@ -106,18 +112,8 @@ classdef SWARM < handle
     % actual instance movement.
     
     methods (Static)
+                
         
-        controls = InverseKinematics(FromState, ToState)  % Inverse Dynamics (or Kinematics) function
-        
-        d = DistanceInStateSpace(x, y) % Function to compute distance between a pair of states
-        
-        us = ControlsShuffle(obj, u) % Function used to generate several variations of a control input, used for branching
-        
-        s = getNewRandomState() % Function used to get a random point in state space
-        
-        h = PlotState(State, Style) % Function used to plot a state
-        
-        PlotStateTransition(varargin) % and to plot a transition between states
         %PlotStateTransition(FromState, ToState, Controls, Style, Width) % and to plot a transition between states
         
     end
