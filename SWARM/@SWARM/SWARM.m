@@ -45,7 +45,10 @@ classdef SWARM < handle
             
             % Hack to obtain the number of states,
             % //TODO: find a better way to obtain it!
+            
             obj.n_states = numel(obj.UAV(1).getNewRandomState);
+            obj.n_inputs = numel(obj.UAV(1).InverseKinematicsFcn(zeros(obj.n_states,1),...
+            zeros(obj.n_states,1)));
             
             k = n+1;
             idxs = (obj.n_states*(k-1)+1):(obj.n_states*k);
@@ -58,11 +61,15 @@ classdef SWARM < handle
         
         function obj = Init(obj, InitialStates)
             n = obj.UAVCount;
-            % Hack to obtain the number of states,
+            % Hack to obtain the number of states and inputs,
             % //TODO: find a better way to obtain it!
             
             if isempty(obj.n_states)
                 obj.n_states = numel(obj.UAV(1).getNewRandomState);
+            end
+            if isempty(obj.n_inputs)
+                obj.n_inputs = numel(obj.UAV(1).InverseKinematicsFcn(zeros(obj.n_states,1),...
+                zeros(obj.n_states,1)));
             end
             
             for k = 1:n

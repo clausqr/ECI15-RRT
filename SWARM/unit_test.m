@@ -1,19 +1,18 @@
 % test SWARM
-clear 
-r = UAV
-r.Init(r.getNewRandomState)
+clear
+
 s = SWARM
 
-s.AddUAV(r)
-s.AddUAV(r)
-s.AddUAV(r)
-s.AddUAV(r)
+N_Agents = 10;
+for k = 1: N_Agents
+r = UAV
+InitialState = r.getNewRandomState;
+InitialState(4) = 0.025;
+r.Init(InitialState)
 s.AddUAV(r)
 
-u = rand(10,1)
 
-s.UpdateState(u)
-
+end
 x = s.getNewRandomState
 y = s.getNewRandomState
 
@@ -33,8 +32,15 @@ y = s.getNewRandomState
 
 u = s.InverseKinematicsFcn(x, y);
 s.UpdateState(u)
+
+
+% s.PlotState(y, '*r')
+% s.PlotStateTransition(x, y, 1,'Green', 1);
+% drawnow update
+
+%pause(1)
 s.PlotStateTransition(x, s.State);
 s.PlotState(s.State, 'xk')
-pause(1)
+drawnow update
 end
 
