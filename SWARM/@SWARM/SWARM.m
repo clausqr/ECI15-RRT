@@ -1,5 +1,5 @@
 classdef SWARM < handle
-    % SWARM Set of functions to model a UAV SWARM and manipulate its state space.
+    % SWARM Set of functions to model a Agent SWARM and manipulate its state space.
     % (c) https://github.com/clausqr for ECI2015
     %
     %  Provides methods to model an instance of a SWARM but also exposes its
@@ -19,11 +19,11 @@ classdef SWARM < handle
         StateHistory    % State History
         CurrentIterationStep    % Current Iteration Step
         
-        UAV     % list of UAVs.
-        UAVCount % Count of UAVs
+        Agent     % list of Agents.
+        AgentCount % Count of Agents
         
-        n_states    % number of states for each UAV
-        n_inputs    % number of inputs for each UAV
+        n_states    % number of states for each Agent
+        n_inputs    % number of inputs for each Agent
     end
     
     methods (Access = public)
@@ -31,51 +31,51 @@ classdef SWARM < handle
         % Constructor
         function obj = SWARM()
             
-            obj.UAVCount = 0;
+            obj.AgentCount = 0;
         end
         
-        function obj = AddUAV(obj, a)
+        function obj = AddAgent(obj, a)
             
-            n = obj.UAVCount;
+            n = obj.AgentCount;
             if (n == 0)
-                obj.UAV = a;
+                obj.Agent = a;
             else
-                obj.UAV(n+1) = a;
+                obj.Agent(n+1) = a;
             end
             
             % Hack to obtain the number of states,
             % //TODO: find a better way to obtain it!
             
-            obj.n_states = numel(obj.UAV(1).getNewRandomState);
-            obj.n_inputs = numel(obj.UAV(1).InverseKinematicsFcn(zeros(obj.n_states,1),...
+            obj.n_states = numel(obj.Agent(1).getNewRandomState);
+            obj.n_inputs = numel(obj.Agent(1).InverseKinematicsFcn(zeros(obj.n_states,1),...
             zeros(obj.n_states,1)));
             
             k = n+1;
             idxs = (obj.n_states*(k-1)+1):(obj.n_states*k);
-            obj.State(idxs,1) = obj.UAV(k).State;
+            obj.State(idxs,1) = obj.Agent(k).State;
             
             
-            obj.UAVCount = n+1;
+            obj.AgentCount = n+1;
             
         end
         
         function obj = Init(obj, InitialStates)
-            n = obj.UAVCount;
+            n = obj.AgentCount;
             % Hack to obtain the number of states and inputs,
             % //TODO: find a better way to obtain it!
             
             if isempty(obj.n_states)
-                obj.n_states = numel(obj.UAV(1).getNewRandomState);
+                obj.n_states = numel(obj.Agent(1).getNewRandomState);
             end
             if isempty(obj.n_inputs)
-                obj.n_inputs = numel(obj.UAV(1).InverseKinematicsFcn(zeros(obj.n_states,1),...
+                obj.n_inputs = numel(obj.Agent(1).InverseKinematicsFcn(zeros(obj.n_states,1),...
                 zeros(obj.n_states,1)));
             end
             
             for k = 1:n
                 idxs = (obj.n_states*(k-1)+1):(obj.n_states*k);
-                obj.UAV(k).Init(InitialStates(idxs));
-                obj.State(idxs) = obj.UAV(k).State;
+                obj.Agent(k).Init(InitialStates(idxs));
+                obj.State(idxs) = obj.Agent(k).State;
             end
         end
         
@@ -83,21 +83,21 @@ classdef SWARM < handle
         function obj = UpdateState(obj, u)
             
             
-            n = obj.UAVCount;
+            n = obj.AgentCount;
             
             % Hack to obtain the number of states and inputs,
             % //TODO: find a better way to obtain it!
             if isempty(obj.n_inputs)
-                x = obj.UAV(1).getNewRandomState;
-                temp_u = obj.UAV(1).InverseKinematicsFcn(x, x);
+                x = obj.Agent(1).getNewRandomState;
+                temp_u = obj.Agent(1).InverseKinematicsFcn(x, x);
                 obj.n_inputs = numel(temp_u);
             end
             
             for k = 1:n
                 idxs_inputs = (obj.n_inputs*(k-1)+1):(obj.n_inputs*k);
                 idxs_states = (obj.n_states*(k-1)+1):(obj.n_states*k);
-                obj.UAV(k).UpdateState(u(idxs_inputs));
-                obj.State(idxs_states) = obj.UAV(k).State;
+                obj.Agent(k).UpdateState(u(idxs_inputs));
+                obj.State(idxs_states) = obj.Agent(k).State;
             end
         end
         

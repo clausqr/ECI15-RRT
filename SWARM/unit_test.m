@@ -9,7 +9,7 @@ r = UAV
 InitialState = r.getNewRandomState;
 InitialState(4) = 0.025;
 r.Init(InitialState)
-s.AddUAV(r)
+s.AddAgent(r)
 
 
 end
@@ -26,7 +26,7 @@ s.PlotState(x, '*r')
 s.PlotState(y, 'ob')
 
 s.PlotStateTransition(x, y)
-for k = 1:10
+for k = 1:50
 x = s.State;    
 y = s.getNewRandomState
 

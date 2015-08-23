@@ -10,9 +10,9 @@ if nargin >3
 end
 
 %unused idxs_inputs = (obj.n_inputs*(k-1)+1):(obj.n_inputs*k);
-h = zeros(1, obj.UAVCount);
+h = zeros(1, obj.AgentCount);
 
-for k=1:obj.UAVCount
+for k=1:obj.AgentCount
     idxs_states = (obj.n_states*(k-1)+1):(obj.n_states*k);
     
     u = us(idxs_states);
@@ -20,10 +20,10 @@ for k=1:obj.UAVCount
     
     if nargin >3
         %h(k) = 
-        obj.UAV(k).PlotStateTransition(u, v, e, color, width);
+        obj.Agent(k).PlotStateTransition(u, v, e, color, width);
     else
         %h(k) = 
-        obj.UAV(k).PlotStateTransition(u, v);
+        obj.Agent(k).PlotStateTransition(u, v);
     end
     
 end
