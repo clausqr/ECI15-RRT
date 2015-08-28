@@ -2,6 +2,8 @@
 
 With Agent delegation methods, implemented in matlab
 
+![Example run](https://github.com/clausqr/ECI15-RRT/raw/master/ghimg/rrt-sample-run4.png)
+
 ## RRTs
 
 Rapidly exploring Random Trees are algorithms used to explore spaces and find paths. Formalized by LaValle [[1]](#cite1) in '98, they are very common in path planning for robotics. 
