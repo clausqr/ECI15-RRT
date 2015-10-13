@@ -31,6 +31,8 @@ As an example a UAV class is implemented and used as an agent. But smooth trajec
 
 ![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/ghimg/rrt-sample-run3.png)
 
+![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/ghimg/rrt-sample-run4.png)
+
 ## Why did you write this?
 
 I attended the course "Path planning for mobile robots in inspection, surveillance, and exploration missions" by M. Saska at ECI2015 [[3]](#cite3) and wanted to see the method working.
