@@ -25,11 +25,11 @@ Graph methods are provided by the digraph class.
 ## Example implementation
 As an example a UAV class is implemented and used as an agent. But smooth trajectories were imposed in the inverse kinematic model, imposing a saturation in the turning angle. Control shuffle was done using only 3-angle steering.
 
-![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/sample-RRT-run.jpg)
+![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/ghimg/rrt-sample-run1.png)
 
-![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/sample-RRT-run.jpg)
+![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/ghimg/rrt-sample-run2.png)
 
-![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/sample-RRT-run.jpg)
+![Example run](https://raw.githubusercontent.com/clausqr/ECI15-RRT/master/ghimg/rrt-sample-run3.png)
 
 ## Why did you write this?
 
